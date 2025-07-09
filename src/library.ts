@@ -13,11 +13,13 @@ type VNode = VTextNode | VFragNode | VElNode | null;
 interface VTextNode {
   type: typeof DOM_TYPES.TEXT;
   value: string;
+  el?: Text;
 }
 
 interface VFragNode {
   type: typeof DOM_TYPES.FRAGMENT;
   children: VNode[];
+  el?: DocumentFragment;
 }
 
 interface VElNode {
@@ -25,7 +27,17 @@ interface VElNode {
   tag: string;
   props: object;
   children: VNode[];
+  el?: HTMLElement;
+  listeners?: { [K in keyof HTMLElementEventMap]?: ((e: Event) => void)[] };
 }
+
+type Props = Partial<
+  {
+    className: string;
+    style: Partial<CSSStyleDeclaration>;
+    on: { [K in keyof HTMLElementEventMap]?: (e: Event) => void };
+  } & Record<string, any>
+>;
 
 // CREATE VIRTUAL DOM NODES
 
@@ -52,8 +64,44 @@ export const h = (tag: string, props: object, children: VNode[]): VElNode => {
   };
 };
 
-// TRANSFORM VIRTUAL DOM TO REAL ELEMENTS
+const parseProps = (
+  props: Props,
+  node: HTMLElement,
+  virtualDom: VElNode
+): void => {
+  const { on, className, style, ...otherAttr } = props;
 
+  if (on) {
+    Object.entries(on).forEach(([type, listener]) => {
+      if (!virtualDom.listeners) {
+        virtualDom.listeners = {};
+      }
+      node.addEventListener(type, listener);
+      // add reference to listener back to virtual dom
+      (virtualDom.listeners[type as keyof HTMLElementEventMap] ??= []).push(
+        listener
+      );
+    });
+  }
+
+  if (className) {
+    // Question: how should we handle className vs classList?
+    // in this case, we won't overwrite existing class names
+    node.classList.add(className);
+  }
+
+  if (style) {
+    for (let [name, value] of Object.entries(style)) {
+      node.style.setProperty(name, value as string);
+    }
+  }
+
+  for (let [name, value] of Object.entries(otherAttr)) {
+    node.setAttribute(name, value);
+  }
+};
+
+// TRANSFORM VIRTUAL DOM TO REAL ELEMENTS
 export const mountDOM = (
   virtualDom: VNode,
   parentToAttachTo: SupportedNodes
@@ -66,13 +114,32 @@ export const mountDOM = (
   if (virtualDom.type === DOM_TYPES.ELEMENT) {
     const { tag, props, children } = virtualDom as VElNode;
     newNode = document.createElement(tag);
-    // parse props
+
+    // TODO: parse props
+    parseProps(props, newNode, virtualDom as VElNode);
+
+    virtualDom.el = newNode;
+    parentToAttachTo.appendChild(newNode);
 
     for (let child of children) {
       mountDOM(child, newNode);
     }
+  } else if (virtualDom.type === DOM_TYPES.FRAGMENT) {
+    const { children } = virtualDom as VFragNode;
+    newNode = document.createDocumentFragment();
+
+    virtualDom.el = newNode;
+    parentToAttachTo.appendChild(newNode);
+
+    for (let child of children) {
+      mountDOM(child, newNode);
+    }
+  } else if (virtualDom.type === DOM_TYPES.TEXT) {
+    const { value } = virtualDom as VTextNode;
+    newNode = document.createTextNode(value);
+
+    parentToAttachTo.appendChild(newNode);
   } else {
-    newNode = document.createTextNode("some text"); // temp
+    return;
   }
-  parentToAttachTo.appendChild(newNode);
 };
