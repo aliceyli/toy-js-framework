@@ -1,4 +1,4 @@
-const DOM_TYPES = {
+export const DOM_TYPES = {
   TEXT: "text",
   ELEMENT: "element",
   FRAGMENT: "fragment",
@@ -69,7 +69,7 @@ const parseProps = (
   node: HTMLElement,
   virtualDom: VElNode
 ): void => {
-  const { on, className, style, ...otherAttr } = props;
+  const { on, class: className, style, ...otherAttr } = props;
 
   if (on) {
     Object.entries(on).forEach(([type, listener]) => {
@@ -86,6 +86,7 @@ const parseProps = (
 
   if (className) {
     // Question: how should we handle className vs classList?
+    // maybe if array, then use classlist, otherwise, use className?
     // in this case, we won't overwrite existing class names
     node.classList.add(className);
   }
@@ -126,13 +127,14 @@ export const mountDOM = (
     }
   } else if (virtualDom.type === DOM_TYPES.FRAGMENT) {
     const { children } = virtualDom as VFragNode;
-    newNode = document.createDocumentFragment();
 
-    virtualDom.el = newNode;
-    parentToAttachTo.appendChild(newNode);
+    // question: since we kinda want to ignore fragments, we don't need to createdocumentfragment() right?
+    // newNode = document.createDocumentFragment();
+    // virtualDom.el = newNode;
+    // parentToAttachTo.appendChild(newNode);
 
     for (let child of children) {
-      mountDOM(child, newNode);
+      mountDOM(child, parentToAttachTo);
     }
   } else if (virtualDom.type === DOM_TYPES.TEXT) {
     const { value } = virtualDom as VTextNode;

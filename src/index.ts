@@ -1,10 +1,10 @@
-import { h, hText, mountDOM } from "./library.ts";
+import { h, hText, hFrag, mountDOM } from "./library.ts";
 
 const root = document.getElementById("app");
 
 // let show = false;
 
-const testVDom = h("div", {}, [
+const testVDom = hFrag([
   h("h1", {}, [hText("TO DO")]),
   h("ul", {}, [
     h("li", {}, [
@@ -13,7 +13,7 @@ const testVDom = h("div", {}, [
       h(
         "button",
         {
-          className: "button1",
+          class: "button1",
           style: { "background-color": "#04AA6D" },
           "data-test-id": "test",
           on: { click: () => alert("button1") },
