@@ -10,32 +10,34 @@ type DomTypes = (typeof DOM_TYPES)[keyof typeof DOM_TYPES];
 
 type VNode = VTextNode | VFragNode | VElNode | null;
 
-interface VTextNode {
+type eventHandler = (e: Event) => void;
+
+export interface VTextNode {
   type: typeof DOM_TYPES.TEXT;
   value: string;
   el?: Text;
 }
 
-interface VFragNode {
+export interface VFragNode {
   type: typeof DOM_TYPES.FRAGMENT;
   children: VNode[];
   el?: DocumentFragment;
 }
 
-interface VElNode {
+export interface VElNode {
   type: typeof DOM_TYPES.ELEMENT;
   tag: string;
   props: object;
   children: VNode[];
   el?: HTMLElement;
-  listeners?: { [K in keyof HTMLElementEventMap]?: ((e: Event) => void)[] };
+  listeners?: { [K in keyof HTMLElementEventMap]?: eventHandler[] };
 }
 
 type Props = Partial<
   {
     className: string;
     style: Partial<CSSStyleDeclaration>;
-    on: { [K in keyof HTMLElementEventMap]?: (e: Event) => void };
+    on: { [K in keyof HTMLElementEventMap]?: eventHandler };
   } & Record<string, any>
 >;
 
@@ -64,6 +66,7 @@ export const h = (tag: string, props: object, children: VNode[]): VElNode => {
   };
 };
 
+// HELPERS
 const parseProps = (
   props: Props,
   node: HTMLElement,
@@ -111,37 +114,84 @@ export const mountDOM = (
     return;
   }
 
-  let newNode: SupportedNodes;
-  if (virtualDom.type === DOM_TYPES.ELEMENT) {
-    const { tag, props, children } = virtualDom as VElNode;
-    newNode = document.createElement(tag);
+  const { type } = virtualDom;
 
-    // TODO: parse props
-    parseProps(props, newNode, virtualDom as VElNode);
+  switch (type) {
+    case DOM_TYPES.ELEMENT: {
+      const { tag, props, children } = virtualDom as VElNode;
+      const newNode = document.createElement(tag);
 
-    virtualDom.el = newNode;
-    parentToAttachTo.appendChild(newNode);
+      parseProps(props, newNode, virtualDom as VElNode);
 
-    for (let child of children) {
-      mountDOM(child, newNode);
+      virtualDom.el = newNode;
+      parentToAttachTo.appendChild(newNode);
+
+      for (let child of children) {
+        mountDOM(child, newNode);
+      }
+      break;
     }
-  } else if (virtualDom.type === DOM_TYPES.FRAGMENT) {
-    const { children } = virtualDom as VFragNode;
+    case DOM_TYPES.FRAGMENT: {
+      const { children } = virtualDom as VFragNode;
 
-    // question: since we kinda want to ignore fragments, we don't need to createdocumentfragment() right?
-    // newNode = document.createDocumentFragment();
-    // virtualDom.el = newNode;
-    // parentToAttachTo.appendChild(newNode);
+      virtualDom.el = parentToAttachTo;
 
-    for (let child of children) {
-      mountDOM(child, parentToAttachTo);
+      for (let child of children) {
+        mountDOM(child, parentToAttachTo);
+      }
+      break;
     }
-  } else if (virtualDom.type === DOM_TYPES.TEXT) {
-    const { value } = virtualDom as VTextNode;
-    newNode = document.createTextNode(value);
+    case DOM_TYPES.TEXT: {
+      const { value } = virtualDom as VTextNode;
+      const newNode = document.createTextNode(value);
 
-    parentToAttachTo.appendChild(newNode);
-  } else {
+      virtualDom.el = newNode;
+      parentToAttachTo.appendChild(newNode);
+      break;
+    }
+    default: {
+      throw new Error(`type ${type} is not valid`);
+    }
+  }
+};
+
+// Destroy DOM
+export const destroyDOM = (virtualDom: VNode) => {
+  if (!virtualDom) {
     return;
+  }
+  const { type } = virtualDom;
+
+  switch (type) {
+    case DOM_TYPES.ELEMENT: {
+      const vElement = virtualDom as VElNode;
+
+      if (vElement.el) {
+        vElement.el.remove();
+        delete vElement.el;
+      }
+
+      if (vElement.listeners) {
+        Object.entries(vElement.listeners).forEach(([eventName, handlers]) =>
+          handlers.forEach((handler) => removeEventListener(eventName, handler))
+        );
+        delete vElement.listeners;
+      }
+
+      vElement.children.forEach((child) => destroyDOM(child));
+      break;
+    }
+    case DOM_TYPES.FRAGMENT: {
+      const { children } = virtualDom as VFragNode;
+      children.forEach((child) => destroyDOM(child));
+      break;
+    }
+    case DOM_TYPES.TEXT: {
+      const { el } = virtualDom as VTextNode;
+      el?.remove();
+
+      delete virtualDom.el;
+      break;
+    }
   }
 };
