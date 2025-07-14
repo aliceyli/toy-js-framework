@@ -8,7 +8,7 @@ import {
 } from "../src/library.ts";
 
 describe("mounting and destroying", () => {
-  test("mounts and destroys text element", () => {
+  it("mounts and destroys text element", () => {
     const vNode: VTextNode = {
       type: DOM_TYPES.TEXT,
       value: "test",
@@ -31,7 +31,7 @@ describe("mounting and destroying", () => {
     expect(parent.childNodes.length).toBe(0);
   });
 
-  test("mounts and destroys fragment", () => {
+  it("mounts and destroys fragment", () => {
     const vNode: VFragNode = {
       type: DOM_TYPES.FRAGMENT,
       children: [
@@ -57,7 +57,7 @@ describe("mounting and destroying", () => {
     expect(parent.childNodes.length).toBe(0);
   });
 
-  test("mounts and destroys element", () => {
+  it("mounts and destroys element", () => {
     const listener = jest.fn();
     const vNode: VElNode = {
       type: DOM_TYPES.ELEMENT,
