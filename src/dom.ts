@@ -1,37 +1,13 @@
-export const DOM_TYPES = {
-  TEXT: "text",
-  ELEMENT: "element",
-  FRAGMENT: "fragment",
-};
+import {
+  DOM_TYPES,
+  VTextNode,
+  VFragNode,
+  VElNode,
+  VNode,
+  eventHandler,
+} from "./types";
 
 type SupportedNodes = HTMLElement | Text | DocumentFragment;
-
-type DomTypes = (typeof DOM_TYPES)[keyof typeof DOM_TYPES];
-
-type VNode = VTextNode | VFragNode | VElNode | null;
-
-type eventHandler = (e: Event) => void;
-
-export interface VTextNode {
-  type: typeof DOM_TYPES.TEXT;
-  value: string;
-  el?: Text;
-}
-
-export interface VFragNode {
-  type: typeof DOM_TYPES.FRAGMENT;
-  children: VNode[];
-  el?: DocumentFragment;
-}
-
-export interface VElNode {
-  type: typeof DOM_TYPES.ELEMENT;
-  tag: string;
-  props: object;
-  children: VNode[];
-  el?: HTMLElement;
-  listeners?: { [K in keyof HTMLElementEventMap]?: eventHandler[] };
-}
 
 type Props = Partial<
   {
@@ -40,31 +16,6 @@ type Props = Partial<
     on: { [K in keyof HTMLElementEventMap]?: eventHandler };
   } & Record<string, any>
 >;
-
-// CREATE VIRTUAL DOM NODES
-
-export const hText = (s: string): VTextNode => {
-  return {
-    type: DOM_TYPES.TEXT,
-    value: s,
-  };
-};
-
-export const hFrag = (children: VNode[]): VFragNode => {
-  return {
-    type: DOM_TYPES.FRAGMENT,
-    children: children,
-  };
-};
-
-export const h = (tag: string, props: object, children: VNode[]): VElNode => {
-  return {
-    type: DOM_TYPES.ELEMENT,
-    tag,
-    props,
-    children,
-  };
-};
 
 // HELPERS
 const parseProps = (

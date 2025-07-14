@@ -3,12 +3,13 @@ type Payload = any;
 type Handler = (arg0: Payload) => void;
 type AfterHandler = () => any;
 type Subscriptions = Map<CommandName, Handler[]>;
+type Unsubscribe = () => void;
 
 export class Dispatcher {
   private subs: Subscriptions = new Map();
   private afterHandlers: AfterHandler[] = []; // may need to update this type when we get more info on what these could be
 
-  subscribe(commandName: CommandName, handler: Handler) {
+  subscribe(commandName: CommandName, handler: Handler): Unsubscribe {
     const { subs } = this;
 
     let subList = subs.get(commandName);
@@ -31,7 +32,7 @@ export class Dispatcher {
     };
   }
 
-  dispatch(commandName: CommandName, payload: Payload) {
+  dispatch(commandName: CommandName, payload: Payload): void {
     const { subs, afterHandlers } = this;
     const handlers = subs.get(commandName);
 
@@ -44,7 +45,7 @@ export class Dispatcher {
     afterHandlers.forEach((handler) => handler());
   }
 
-  addAfterHandler(handler: AfterHandler) {
+  addAfterHandler(handler: AfterHandler): Unsubscribe {
     const { afterHandlers } = this;
 
     afterHandlers.push(handler);

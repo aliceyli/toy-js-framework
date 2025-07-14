@@ -1,11 +1,5 @@
-import {
-  mountDOM,
-  destroyDOM,
-  DOM_TYPES,
-  VFragNode,
-  VTextNode,
-  VElNode,
-} from "../src/library.ts";
+import { mountDOM, destroyDOM } from "../src/dom.ts";
+import { DOM_TYPES, VFragNode, VTextNode, VElNode } from "../src/types";
 
 describe("mounting and destroying", () => {
   it("mounts and destroys text element", () => {
