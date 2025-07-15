@@ -1,5 +1,5 @@
 type CommandName = string;
-type Payload = any;
+export type Payload = any;
 type Handler = (arg0: Payload) => void;
 type AfterHandler = () => any;
 type Subscriptions = Map<CommandName, Handler[]>;

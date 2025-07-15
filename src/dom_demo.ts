@@ -3,8 +3,6 @@ import { h, hText, hFrag } from "./hyperscript.ts";
 
 const root = document.getElementById("app");
 
-// let show = false;
-
 const testVDom = hFrag([
   h("h1", {}, [hText("TO DO")]),
   h("ul", {}, [

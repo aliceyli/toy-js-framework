@@ -5,9 +5,8 @@ import {
   VElNode,
   VNode,
   eventHandler,
+  SupportedNodes,
 } from "./types";
-
-type SupportedNodes = HTMLElement | Text | DocumentFragment;
 
 type Props = Partial<
   {
