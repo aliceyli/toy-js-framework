@@ -13,12 +13,30 @@ export const addTodo = (state: ToDoState, s: string) => {
   todos.push(s);
   return { todos };
 };
+export const removeTodo = (state: ToDoState, s: string) => {
+  const { todos } = state;
+  const idx = todos.findIndex((todo) => todo === s);
+  return { todos: todos.splice(idx, 1) };
+};
 
 export const view: ViewFn<ToDoState> = (state, emit) => {
   const { todos } = state;
 
   const todoElements = todos.map((todo) =>
-    h("li", { class: `${todo.replace(/ /g, "-")}` }, [hText(todo)])
+    h("li", { class: `${todo.replace(/ /g, "-")}` }, [
+      hText(todo),
+      h(
+        "button",
+        {
+          on: {
+            click: () => {
+              emit("removeTodo", todo);
+            },
+          },
+        },
+        [hText("done")]
+      ),
+    ])
   );
 
   const header = h("h1", {}, [hText("TO DO")]);
