@@ -28,3 +28,5 @@ export interface VElNode {
 export type VNode = VTextNode | VFragNode | VElNode | null;
 
 export type eventHandler = (e: Event) => void;
+
+export type SupportedNodes = HTMLElement | Text | DocumentFragment;
