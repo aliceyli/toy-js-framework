@@ -35,7 +35,7 @@ export function createApp<S>({
 
   Object.entries(reducers).forEach(([command, reducer]) => {
     const unsub = dispatcher.subscribe(command, (payload) => {
-      reducer(state, payload);
+      state = reducer(state, payload);
     });
     unsubscribers.push(unsub);
   });
