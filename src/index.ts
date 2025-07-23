@@ -120,8 +120,6 @@ export const placeMove = (state: TTTState, payload: Position): TTTState => {
   let { board, activePlayer, gameStatus, test, strTest } = state;
   const row = payload[0];
   const col = payload[1];
-  test[0] = test[0] + 1;
-  strTest += 1;
 
   if (moveValid(row, col, board) && gameStatus === "ongoing") {
     let updatedBoard = board;
@@ -135,8 +133,6 @@ export const placeMove = (state: TTTState, payload: Position): TTTState => {
       activePlayer: activePlayer,
       gameStatus: newGameStatus,
       winner: updatedWinner,
-      test: test,
-      strTest: strTest,
     };
   }
   return state;
