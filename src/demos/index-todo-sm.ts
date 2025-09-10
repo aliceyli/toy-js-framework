@@ -69,6 +69,6 @@ export const view: ViewFn<TodoState> = (state, emit) => {
   return hFrag([header, input, button, todoList]);
 };
 
-export const createTodoStateMachineApp = () => {
+export const createTodoApp = () => {
   return createApp<TodoState>({ state, view, reducers });
 };

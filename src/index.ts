@@ -1,7 +1,6 @@
 import { mountDOM } from "./dom";
 import { h, hText, hFrag } from "./hyperscript";
-import { createTodoApp } from "./demos/index-todo";
-import { createTodoStateMachineApp } from "./demos/index-todo-sm";
+import { createTodoApp } from "./demos/index-todo-sm";
 import { createTicTacToeApp } from "./demos/index-ttt";
 
 // Demo selector - change this to switch between demos
@@ -66,10 +65,6 @@ function initDemo() {
     case "todo":
       const todoApp = createTodoApp();
       todoApp.mount(root);
-      break;
-    case "todo-sm":
-      const todoSMApp = createTodoStateMachineApp();
-      todoSMApp.mount(root);
       break;
     case "tictactoe":
       const tttApp = createTicTacToeApp();
