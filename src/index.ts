@@ -1,188 +1,84 @@
-// export { createApp } from "./app";
-// export { h, hFrag, hText } from "./hyperscript";
+import { mountDOM } from "./dom";
+import { h, hText, hFrag } from "./hyperscript";
+import { createTodoApp } from "./demos/index-todo";
+import { createTodoStateMachineApp } from "./demos/index-todo-sm";
+import { createTicTacToeApp } from "./demos/index-ttt";
 
-import { createApp } from "./app";
-import { State, ViewFn } from "./app";
-import { h, hFrag, hText } from "./hyperscript";
-
-type Player = "X" | "O";
-type PlayableBound = 0 | 1 | 2;
-type Position = [PlayableBound, PlayableBound];
-type Board = string[][];
-type GameStatus = "won" | "tie" | "ongoing";
-type Winner = Player | "";
-export interface TTTState extends State {
-  board: Board;
-  activePlayer: Player;
-  gameStatus: GameStatus;
-  winner: Winner;
-}
-
-const state: TTTState = {
-  board: [
-    ["", "", ""],
-    ["", "", ""],
-    ["", "", ""],
-  ],
-  activePlayer: "X",
-  gameStatus: "ongoing",
-  winner: "",
-  test: [0],
-  strTest: 0,
-};
+// Demo selector - change this to switch between demos
+type DemoType = "static" | "todo" | "todo-sm" | "tictactoe";
+const CURRENT_DEMO: DemoType = "static";
 
 const root = document.getElementById("app");
 
-const moveValid = (
-  row: PlayableBound,
-  col: PlayableBound,
-  board: Board
-): boolean => {
-  return board[row][col] !== "X" && board[row][col] !== "O";
-};
-
-const checkGame = (
-  board: Board
-): { newGameStatus: GameStatus; updatedWinner: Winner } => {
-  const rowChecks = [
-    // ROWS
-    [
-      [0, 0],
-      [0, 1],
-      [0, 2],
-    ],
-    [
-      [1, 0],
-      [1, 1],
-      [1, 2],
-    ],
-    [
-      [2, 0],
-      [2, 1],
-      [2, 2],
-    ],
-    // COLUMNS
-    [
-      [0, 0],
-      [1, 0],
-      [2, 0],
-    ],
-    [
-      [0, 1],
-      [1, 1],
-      [2, 1],
-    ],
-    [
-      [0, 2],
-      [1, 2],
-      [2, 2],
-    ],
-    [
-      [0, 2],
-      [1, 2],
-      [2, 2],
-    ],
-    // DIAGONALS
-    [
-      [0, 0],
-      [1, 1],
-      [2, 2],
-    ],
-    [
-      [0, 2],
-      [1, 1],
-      [2, 0],
-    ],
-  ];
-  let newGameStatus: GameStatus = "ongoing";
-  let updatedWinner: Winner = "";
-
-  rowChecks.forEach(([pos1, pos2, pos3]) => {
-    if (board[pos1[0]][pos1[1]] !== "") {
-      if (
-        board[pos1[0]][pos1[1]] === board[pos2[0]][pos2[1]] &&
-        board[pos2[0]][pos2[1]] === board[pos3[0]][pos3[1]]
-      ) {
-        newGameStatus = "won";
-        updatedWinner = board[pos1[0]][pos1[1]] as Player;
-      }
-    }
-  });
-  return { newGameStatus, updatedWinner };
-};
-
-const switchPlayer = (activePlayer: Player): Player => {
-  console.log({ activePlayer });
-  return activePlayer === "X" ? "O" : "X";
-};
-
-export const placeMove = (state: TTTState, payload: Position): TTTState => {
-  let { board, activePlayer, gameStatus, test, strTest } = state;
-  const row = payload[0];
-  const col = payload[1];
-
-  if (moveValid(row, col, board) && gameStatus === "ongoing") {
-    let updatedBoard = board;
-    updatedBoard[row][col] = activePlayer;
-    const { newGameStatus, updatedWinner } = checkGame(updatedBoard);
-    if (newGameStatus === "ongoing") {
-      activePlayer = switchPlayer(activePlayer);
-    }
-    return {
-      board: updatedBoard,
-      activePlayer: activePlayer,
-      gameStatus: newGameStatus,
-      winner: updatedWinner,
-    };
-  }
-  return state;
-};
-
-const reducers = {
-  placeMove: placeMove,
-};
-
-export const view: ViewFn<TTTState> = (state, emit) => {
-  const { activePlayer, board, winner } = state;
-  const title = h("h1", {}, [hText("Tic-Tac-Toe")]);
-  const playerLabel = h("h3", {}, [
-    hText(winner ? `winner: ${winner}` : `it is ${activePlayer}'s turn`),
+function createStaticDemo() {
+  const testVDom = hFrag([
+    h("h1", {}, [hText("Static VDOM Demo")]),
+    h("p", {}, [
+      hText("This is a static virtual DOM example showing hyperscript usage."),
+    ]),
+    h("ul", {}, [
+      h("li", {}, [
+        hText("✅ implement mount dom"),
+        h(
+          "button",
+          {
+            class: "button1",
+            style: { "background-color": "#04AA6D" },
+            "data-test-id": "test",
+            on: { click: () => alert("button1 clicked!") },
+          },
+          [hText("Test Button")]
+        ),
+      ]),
+      h("li", {}, [hText("✅ implement destroy dom")]),
+    ]),
+    h("div", { style: { "margin-top": "20px" } }, [
+      h("p", {}, [
+        hText("Change CURRENT_DEMO in src/index.ts to switch demos:"),
+      ]),
+      h("ul", {}, [
+        h("li", {}, [hText('"static" - This demo')]),
+        h("li", {}, [hText('"todo" - Basic todo list')]),
+        h("li", {}, [hText('"todo-sm" - State machine todo list')]),
+        h("li", {}, [hText('"tictactoe" - Tic-tac-toe game')]),
+      ]),
+    ]),
   ]);
-  const boardView = h(
-    "div",
-    { class: "board" },
-    board.map((row, r) => {
-      return h(
-        "div",
-        { class: `row-${r}`, style: { display: "flex" } },
-        row.map((cell, c) =>
-          h(
-            "div",
-            {
-              class: `${r}${c}`,
-              style: {
-                width: "20px",
-                height: "20px",
-                border: "1px solid",
-              },
-              on: {
-                click: () => {
-                  emit("placeMove", [r as PlayableBound, c as PlayableBound]);
-                },
-              },
-            },
-            [hText(cell)]
-          )
-        )
-      );
-    })
-  );
 
-  return hFrag([title, playerLabel, boardView]);
-};
-
-const app = createApp<TTTState>({ state, view, reducers });
-
-if (root) {
-  app.mount(root);
+  if (root) {
+    mountDOM(testVDom, root);
+  }
 }
+
+function initDemo() {
+  if (!root) {
+    console.error("Could not find #app element");
+    return;
+  }
+
+  // Clear the root first
+  root.innerHTML = "";
+
+  switch (CURRENT_DEMO) {
+    case "static":
+      createStaticDemo();
+      break;
+    case "todo":
+      const todoApp = createTodoApp();
+      todoApp.mount(root);
+      break;
+    case "todo-sm":
+      const todoSMApp = createTodoStateMachineApp();
+      todoSMApp.mount(root);
+      break;
+    case "tictactoe":
+      const tttApp = createTicTacToeApp();
+      tttApp.mount(root);
+      break;
+    default:
+      console.error(`Unknown demo type: ${CURRENT_DEMO}`);
+  }
+}
+
+// Initialize the demo
+initDemo();

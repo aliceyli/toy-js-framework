@@ -1,6 +1,5 @@
-import { h, hText, hFrag } from "./hyperscript";
-import { VNode } from "./types";
-import { State, Emit, ViewFn } from "./app";
+import { h, hText, hFrag } from "../hyperscript";
+import { State, ViewFn, createApp } from "../app";
 
 export interface ToDoState extends State {
   todos: string[];
@@ -17,6 +16,15 @@ export const removeTodo = (state: ToDoState, s: string) => {
   const { todos } = state;
   const idx = todos.findIndex((todo) => todo === s);
   return { todos: todos.splice(idx, 1) };
+};
+
+const state: ToDoState = {
+  todos: ["Learn TypeScript", "Build a framework"],
+};
+
+const reducers = {
+  addTodo: addTodo,
+  removeTodo: removeTodo,
 };
 
 export const view: ViewFn<ToDoState> = (state, emit) => {
@@ -39,7 +47,7 @@ export const view: ViewFn<ToDoState> = (state, emit) => {
     ])
   );
 
-  const header = h("h1", {}, [hText("TO DO")]);
+  const header = h("h1", {}, [hText("TO DO (Basic)")]);
   const addBar = h("div", {}, [
     h("label", { for: "newTodo" }, [hText("new TODO")]),
     h("input", { type: "text", id: "newTodo" }, []),
@@ -50,9 +58,9 @@ export const view: ViewFn<ToDoState> = (state, emit) => {
         on: {
           click: () => {
             const newTodoInput =
-              document.querySelector<HTMLInputElement>("#newTodo");
+              document.querySelector<HTMLInputElement>("#newTodo"); // wrong; we don't want to manipulate dom directly
             if (!newTodoInput) {
-              throw new Error("Couldn’t find #newTodo input");
+              throw new Error("Couldn't find #newTodo input");
             }
             const newTodo = newTodoInput.value.trim();
             if (newTodo) {
@@ -67,4 +75,8 @@ export const view: ViewFn<ToDoState> = (state, emit) => {
   const todoList = h("ul", { class: "todo-list" }, todoElements);
 
   return hFrag([header, addBar, todoList]);
+};
+
+export const createTodoApp = () => {
+  return createApp<ToDoState>({ state, view, reducers });
 };
