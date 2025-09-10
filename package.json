@@ -4,7 +4,9 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "build": "esbuild src/index.ts --bundle --outfile=./src/dist/out.js"
+    "build": "esbuild src/index.ts --bundle --outfile=./src/dist/out.js",
+    "dev": "python3 -m http.server 8080 --directory src",
+    "start": "npm run build && npm run dev"
   },
   "keywords": [],
   "author": "",
