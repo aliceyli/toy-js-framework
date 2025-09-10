@@ -13,24 +13,20 @@ function createStaticDemo() {
   const testVDom = hFrag([
     h("h1", {}, [hText("Static VDOM Demo")]),
     h("p", {}, [
-      hText("This is a static virtual DOM example showing hyperscript usage."),
+      hText(
+        "This is a static virtual DOM example showing hyperscript usage. Here's how to create a button and a list:"
+      ),
     ]),
-    h("ul", {}, [
-      h("li", {}, [
-        hText("✅ implement mount dom"),
-        h(
-          "button",
-          {
-            class: "button1",
-            style: { "background-color": "#04AA6D" },
-            "data-test-id": "test",
-            on: { click: () => alert("button1 clicked!") },
-          },
-          [hText("Test Button")]
-        ),
-      ]),
-      h("li", {}, [hText("✅ implement destroy dom")]),
-    ]),
+    h(
+      "button",
+      {
+        class: "button1",
+        style: { "background-color": "#04AA6D" },
+        "data-test-id": "test",
+        on: { click: () => alert("button clicked!") },
+      },
+      [hText("Test Button")]
+    ),
     h("div", { style: { "margin-top": "20px" } }, [
       h("p", {}, [
         hText("Change CURRENT_DEMO in src/index.ts to switch demos:"),
@@ -38,7 +34,6 @@ function createStaticDemo() {
       h("ul", {}, [
         h("li", {}, [hText('"static" - This demo')]),
         h("li", {}, [hText('"todo" - Basic todo list')]),
-        h("li", {}, [hText('"todo-sm" - State machine todo list')]),
         h("li", {}, [hText('"tictactoe" - Tic-tac-toe game')]),
       ]),
     ]),
