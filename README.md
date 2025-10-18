@@ -18,15 +18,6 @@ Future work:
 
 Feel free to explore the code and experiment with the demos!
 
-## Features
-
-- 🌳 **Virtual DOM** - Efficient DOM manipulation with three node types (ELEMENT, TEXT, FRAGMENT)
-- 🎯 **Hyperscript API** - Declarative UI creation with `h()`, `hText()`, and `hFrag()`
-- 🔄 **State Management** - Flux-style architecture with reducers and dispatcher
-- 🎮 **Event Handling** - Built-in event listener management with automatic cleanup
-- 📦 **TypeScript** - Full type safety throughout the framework
-- 🧪 **Testing** - Jest test suite with jsdom environment
-
 ## Quick Start
 
 ```bash
